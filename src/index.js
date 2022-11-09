@@ -26,6 +26,7 @@ import {
   signInWithPopup,
   signOut,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   signInWithCustomToken,
   createCustomToken,
 } from 'firebase/auth';
@@ -67,23 +68,56 @@ async function signIn() {
 
 
 
-function createUser(){
+async function createUser(){
   const auth = getAuth();
-  createUserWithEmailAndPassword(auth, 'abc@gmai.com', '123456')
+
+
+  const Logged =  getAuth().currentUser;
+  console.log('Logged return: ', Logged);
+  console.log('auth: ', auth);
+   const currentUser =  auth.currentUser;
+   console.log('currentUser: ', currentUser);
+  if( currentUser ) return 0;
+
+  const email = "abc@gmai.com";
+  createUserWithEmailAndPassword(auth, email, '123456')
     .then((userCredential) => {
       // Signed in 
-
       const user = userCredential.user;
       auth.currentUser = userCredential.user; // isUserSignedIn()
-      console.log('create user done.');
-      console.log(userCredential);
-      console.log(userCredential.user);
       onAuthStateChanged(getAuth(), authStateObserver);
       // ...
     })
     .catch((error) => {
+      console.log('create user fail', error);
+      signInWithEmailAndPassword(auth, email, '123456')
+      .then((userCredential) => {
+        // Signed in 
+        console.log('Auto log in ok.');
+        const user = userCredential.user;
+        auth.currentUser = userCredential.user; // isUserSignedIn()
+        // ...
+      })
+      .catch((error) => {
+        console.log('Auto log in fail => Set new password.');
+        const user = auth.currentUser;
+        const newPassword = getASecureRandomPassword();
 
-      console.log('Error create user:', error);
+        updatePassword(user, newPassword).then(() => {
+          // Update successful.
+        }).catch((error) => {
+          console.log('log in with new pasword.');
+          signInWithEmailAndPassword(auth, email, newPassword);
+          // An error ocurred
+          // ...
+        });
+
+        const errorCode = error.code;
+        const errorMessage = error.message;
+      });
+
+
+     
       const errorCode = error.code;
       const errorMessage = error.message;
       // ..
