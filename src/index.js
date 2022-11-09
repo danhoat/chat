@@ -25,6 +25,9 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signOut,
+  createUserWithEmailAndPassword,
+  signInWithCustomToken,
+  createCustomToken,
 } from 'firebase/auth';
 import {
   getFirestore,
@@ -61,6 +64,78 @@ async function signIn() {
   var provider = new GoogleAuthProvider();
   await signInWithPopup(getAuth(), provider);
 }
+
+
+
+function createUser(){
+  const auth = getAuth();
+  createUserWithEmailAndPassword(auth, 'abc@gmai.com', '123456')
+    .then((userCredential) => {
+      // Signed in 
+
+      const user = userCredential.user;
+      auth.currentUser = userCredential.user; // isUserSignedIn()
+      console.log('create user done.');
+      console.log(userCredential);
+      console.log(userCredential.user);
+      onAuthStateChanged(getAuth(), authStateObserver);
+      // ...
+    })
+    .catch((error) => {
+
+      console.log('Error create user:', error);
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // ..
+    });
+}
+
+// var admin = require("firebase-admin");
+
+// var serviceAccount = require("livechat-ad319-firebase-adminsdk-5cafn-4475622915.json");
+
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+//   databaseURL: "https://livechat-ad319-default-rtdb.firebaseio.com"
+// });
+
+
+// const uid= 'WsogxX36jDVPiqZx6K9prc2GBGZ2';
+// const auth = getAuth().createCustomToken(uid)
+//   .then((customToken) => {
+//     console.log('createCustomToken successful.');
+//     // Send token back to client
+//   }).catch((error) => {
+//     console.log('Error creating custom token:', error);
+//   });
+
+// signInWithCustomToken(auth, token)
+//   .then((userCredential) => {
+//     // Signed in
+//     const user = userCredential.user;
+//     // ...
+//   })
+//   .catch((error) => {
+//     const errorCode = error.code;
+//     const errorMessage = error.message;
+//     // ...
+//   });
+
+
+
+// signInWithCustomToken(auth, token)
+//   .then((userCredential) => {
+//     // Signed in
+//     const user = userCredential.user;
+//     // ...
+//   })
+//   .catch((error) => {
+//     const errorCode = error.code;
+//     const errorMessage = error.message;
+//     // ...
+//   });
+
+
 
 // Signs-out of Friendly Chat.
 function signOutUser() {
@@ -539,3 +614,5 @@ loadMessages();
 insertCities();
 
 showListCities();
+
+createUser();
